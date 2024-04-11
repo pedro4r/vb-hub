@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 import { CheckInTableFilters } from './check-in-table-filters'
+import { ResizeImage } from './resize-image'
 
 export interface CustomerDataInterface {
   name: string
@@ -15,17 +16,41 @@ export interface CustomerDataInterface {
 
 export function CreateCheckIn() {
   const [customerData, setCustomerData] = useState<CustomerDataInterface>()
+  const [images, setImages] = useState<string[]>([])
 
   function handleData(data: CustomerDataInterface) {
     setCustomerData(data)
   }
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+
+  const { isDragActive, getInputProps, fileRejections } = useDropzone({
     accept: {
-      'image/*': ['.jpg', '.jpeg', '.png', '.gif'],
+      'image/*': ['.jpg', '.jpeg', '.png'],
     },
     multiple: true,
-    maxSize: 524_288_000,
+    maxSize: 5 * 1024 * 1024,
+    onDrop: (acceptedFiles) => {
+      acceptedFiles.forEach((file) => {
+        ResizeImage(file, 1024, 1024, 0.1).then((ResizedImage) => {
+          ResizedImage.arrayBuffer().then((buffer) => {
+            console.log(`Resized file size: ${buffer.byteLength} bytes`)
+          })
+
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setImages((prevImages) => [...prevImages, reader.result as string])
+          }
+          reader.readAsDataURL(ResizedImage)
+        })
+      })
+    },
   })
+
+  fileRejections.forEach((fileRejection) => {
+    console.error(
+      `File ${fileRejection.file.name} was rejected. ${fileRejection.errors[0].message}`,
+    )
+  })
+
   return (
     <div className="mt-20 flex h-full w-full items-center justify-center">
       <Helmet title="Criar Check-in" />
@@ -58,16 +83,17 @@ export function CreateCheckIn() {
               htmlFor="files"
               className="flex h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-zinc-50 p-4 text-sm text-zinc-600 hover:bg-zinc-100 data-[drag-active=true]:border-primary data-[drag-active=true]:bg-primary dark:bg-zinc-900 dark:text-zinc-400"
               data-drag-active={isDragActive}
-              {...getRootProps()}
             >
               <UploadIcon className="h-4 w-4" />
               <div className="flex flex-col gap-1 text-center">
                 <span className="font-medium">Carregar fotos</span>
               </div>
             </label>
-
             <input type="file" id="files" multiple {...getInputProps()} />
-
+            {images &&
+              images.map((image, index) => (
+                <img key={index} src={image} alt={`Preview ${index}`} />
+              ))}
             <Button type="submit" className="w-full">
               Criar Check-In
             </Button>
