@@ -4,6 +4,7 @@ import { useDropzone } from 'react-dropzone'
 import { Helmet } from 'react-helmet-async'
 
 import { Button } from '@/components/ui/button'
+import { ImageContainer } from '@/components/ui/image-container'
 import { Input } from '@/components/ui/input'
 
 import { CheckInTableFilters } from './check-in-table-filters'
@@ -51,6 +52,12 @@ export function CreateCheckIn() {
     )
   })
 
+  const removeImage = (index: number) => {
+    const newImages = [...images]
+    newImages.splice(index, 1)
+    setImages(newImages) // supondo que você tenha um estado chamado 'images' e um setter chamado 'setImages'
+  }
+
   return (
     <div className="mt-20 flex h-full w-full items-center justify-center">
       <Helmet title="Criar Check-in" />
@@ -90,10 +97,25 @@ export function CreateCheckIn() {
               </div>
             </label>
             <input type="file" id="files" multiple {...getInputProps()} />
-            {images &&
-              images.map((image, index) => (
-                <img key={index} src={image} alt={`Preview ${index}`} />
-              ))}
+            <div className="flex flex-wrap content-end items-start gap-2">
+              {images &&
+                images.map((image, index) => (
+                  <div key={index} className="relative">
+                    <Button
+                      variant={'ghost'}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 p-2 text-xs text-stone-50"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        removeImage(index) // Chama a função removeImage com o índice da imagem
+                      }}
+                    >
+                      x
+                    </Button>
+                    <ImageContainer imageSrc={image} alt={`Preview ${index}`} />
+                  </div>
+                ))}
+            </div>
+
             <Button type="submit" className="w-full">
               Criar Check-In
             </Button>
