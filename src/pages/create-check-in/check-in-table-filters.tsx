@@ -4,6 +4,10 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import {
+  getCustomerByHubId,
+  GetCustomerByHubIdParams,
+} from '@/api/get-customer-by-hub-id'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -16,10 +20,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-import { CustomerDataInterface } from './create-check-in'
+import { CustomerPreviewDataInterface } from './create-check-in'
 
 interface CheckInTableFiltersProps {
-  onData: (data: CustomerDataInterface) => void
+  onData: (data: CustomerPreviewDataInterface) => void
 }
 
 const searchCustomerSchema = z
@@ -33,49 +37,30 @@ const searchCustomerSchema = z
 type SearchCustomerSchema = z.infer<typeof searchCustomerSchema>
 
 export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
-  const fakeData = [
-    {
-      name: 'Pedro Requião',
-      hubId: '124',
-    },
-    {
-      name: 'Tayane Sampaio Requiao',
-      hubId: '3849',
-    },
-    {
-      name: 'Tania Sampaio',
-      hubId: '4321',
-    },
-    {
-      name: 'Heloisa Requiao',
-      hubId: '5632',
-    },
-  ]
-
-  const [customersFound, setCustomersFound] = useState<SearchCustomerSchema[]>(
-    [],
-  )
+  const [customersFound, setCustomersFound] = useState<
+    CustomerPreviewDataInterface[]
+  >([])
 
   const [openDialog, setOpenDialog] = useState(false)
 
-  function selectCustomer(data: SearchCustomerSchema) {
-    if (data && data.name && data.hubId) {
-      onData(data as CustomerDataInterface)
+  function selectCustomer(data: CustomerPreviewDataInterface) {
+    if (data && data.firstName && data.lastName && data.hubId) {
+      onData(data as CustomerPreviewDataInterface)
     }
 
     setOpenDialog(!openDialog)
   }
 
-  function searchCustomer({ hubId, name }: SearchCustomerSchema) {
-    setOpenDialog(true)
-    if (hubId) {
-      const apiResponse = fakeData.filter((data) => data.hubId === hubId)
-      setCustomersFound(apiResponse)
-    } else if (name) {
-      const apiResponse = fakeData.filter((data) =>
-        data.name.toLowerCase().includes(name.toLowerCase()),
-      )
-      setCustomersFound(apiResponse)
+  async function searchCustomer(data: SearchCustomerSchema) {
+    if (data && data.hubId) {
+      const params: GetCustomerByHubIdParams = {
+        hubId: data.hubId,
+      }
+
+      const customer = await getCustomerByHubId(params)
+      setOpenDialog(true)
+
+      setCustomersFound([customer])
     }
   }
 
@@ -124,9 +109,16 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
               </TableHeader>
               <TableBody>
                 {customersFound.map((data) => (
-                  <TableRow key={data.hubId} className="hover:bg-transparent">
-                    <TableCell className="text-center">{data.hubId}</TableCell>
-                    <TableCell className="text-center">{data.name}</TableCell>
+                  <TableRow
+                    key={data.customerId}
+                    className="hover:bg-transparent"
+                  >
+                    <TableCell className="text-center">
+                      {`#${data.hubId}`}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {data.firstName} {data.lastName}
+                    </TableCell>
                     <TableCell className="text-center">
                       <Button
                         className="h-[30px] w-[50px]"

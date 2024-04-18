@@ -1,26 +1,81 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { UploadIcon, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Helmet } from 'react-helmet-async'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
+import { createCheckInApi } from '@/api/create-check-in'
+import { UploadAttachments } from '@/api/upload-attachments'
 import { Button } from '@/components/ui/button'
 import { ImageContainer } from '@/components/ui/image-container'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 import { CheckInTableFilters } from './check-in-table-filters'
 import { ResizeImage } from './resize-image'
 
-export interface CustomerDataInterface {
-  name: string
-  hubId: string
+const createCheckInSchema = z.object({
+  customerId: z.string().uuid(),
+  description: z.string().optional(),
+})
+
+type CreateCheckFormData = z.infer<typeof createCheckInSchema>
+
+export interface CustomerPreviewDataInterface {
+  customerId: string
+  firstName: string
+  lastName: string
+  hubId: number
 }
 
 export function CreateCheckIn() {
-  const [customerData, setCustomerData] = useState<CustomerDataInterface>()
+  const [customerData, setCustomerData] =
+    useState<CustomerPreviewDataInterface | null>(null)
   const [images, setImages] = useState<string[]>([])
 
-  function handleData(data: CustomerDataInterface) {
+  function handleData(data: CustomerPreviewDataInterface) {
     setCustomerData(data)
+  }
+
+  const removeImage = (index: number) => {
+    const newImages = [...images]
+    newImages.splice(index, 1)
+    setImages(newImages)
+  }
+
+  async function handleCreateCheckIn(data: CreateCheckFormData) {
+    if (!images.length) {
+      console.log('No images to upload')
+      return
+    }
+
+    try {
+      const uploadPromises = images.map((imageUrl) =>
+        fetch(imageUrl)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const file = new File([blob], 'image.jpg', { type: 'image/jpeg' })
+            return UploadAttachments(file)
+          }),
+      )
+
+      const attachments = await Promise.all(uploadPromises)
+
+      const result = createCheckInApi({
+        customerId: data.customerId,
+        details: data.description,
+        attachmentsIds: attachments.map(
+          (attachment) => attachment.attachmentId,
+        ),
+      })
+
+      console.log('Check-in created:', result)
+
+      console.log('Upload successful:', attachments)
+    } catch (error) {
+      console.error('Error uploading images:', error)
+    }
   }
 
   const { isDragActive, getInputProps, fileRejections } = useDropzone({
@@ -32,10 +87,7 @@ export function CreateCheckIn() {
     onDrop: (acceptedFiles) => {
       acceptedFiles.forEach((file) => {
         ResizeImage(file, 1024, 1024, 0.1).then((ResizedImage) => {
-          ResizedImage.arrayBuffer().then((buffer) => {
-            console.log(`Resized file size: ${buffer.byteLength} bytes`)
-          })
-
+          ResizedImage.arrayBuffer()
           const reader = new FileReader()
           reader.onloadend = () => {
             setImages((prevImages) => [...prevImages, reader.result as string])
@@ -52,11 +104,13 @@ export function CreateCheckIn() {
     )
   })
 
-  const removeImage = (index: number) => {
-    const newImages = [...images]
-    newImages.splice(index, 1)
-    setImages(newImages) // supondo que você tenha um estado chamado 'images' e um setter chamado 'setImages'
-  }
+  const { register, handleSubmit, setValue } = useForm<CreateCheckFormData>({
+    resolver: zodResolver(createCheckInSchema),
+  })
+
+  useEffect(() => {
+    setValue('customerId', customerData?.customerId || '')
+  }, [customerData, setValue])
 
   return (
     <div className="mt-20 flex h-full w-full items-center justify-center">
@@ -69,10 +123,10 @@ export function CreateCheckIn() {
           {customerData ? (
             <div className="flex items-center justify-between rounded-md bg-neutral-900 pl-4">
               <span>{`#${customerData.hubId}`}</span>
-              <span>{customerData.name}</span>
+              <span>{`${customerData.firstName} ${customerData.lastName}`}</span>
               <Button
                 onClick={() => {
-                  setCustomerData(undefined)
+                  setCustomerData(null)
                 }}
                 variant="ghost"
                 className="bg-red-600"
@@ -84,8 +138,16 @@ export function CreateCheckIn() {
             <CheckInTableFilters onData={handleData} />
           )}
 
-          <form className="flex flex-col gap-4">
-            <Input type="text" className="hidden" />
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit(handleCreateCheckIn)}
+          >
+            <input
+              value={customerData?.customerId || ''}
+              className="hidden"
+              {...register('customerId')}
+            />
+            <input type="text" className="hidden" />
             <label
               htmlFor="files"
               className="flex h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-zinc-50 p-4 text-sm text-zinc-600 hover:bg-zinc-100 data-[drag-active=true]:border-primary data-[drag-active=true]:bg-primary dark:bg-zinc-900 dark:text-zinc-400"
@@ -106,7 +168,7 @@ export function CreateCheckIn() {
                       className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 p-2 text-xs text-stone-50"
                       onClick={(event) => {
                         event.preventDefault()
-                        removeImage(index) // Chama a função removeImage com o índice da imagem
+                        removeImage(index)
                       }}
                     >
                       x
@@ -116,7 +178,9 @@ export function CreateCheckIn() {
                 ))}
             </div>
 
-            <Button type="submit" className="w-full">
+            <Textarea placeholder="Observações" {...register('description')} />
+
+            <Button className="w-full" type="submit">
               Criar Check-In
             </Button>
           </form>
