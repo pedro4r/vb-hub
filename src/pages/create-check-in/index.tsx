@@ -34,7 +34,7 @@ export function CreateCheckIn() {
     useState<CustomerPreviewDataInterface | null>(null)
   const [images, setImages] = useState<string[]>([])
 
-  function handleData(data: CustomerPreviewDataInterface) {
+  function handleSetCustomerData(data: CustomerPreviewDataInterface) {
     setCustomerData(data)
   }
 
@@ -42,40 +42,6 @@ export function CreateCheckIn() {
     const newImages = [...images]
     newImages.splice(index, 1)
     setImages(newImages)
-  }
-
-  async function handleCreateCheckIn(data: CreateCheckFormData) {
-    if (!images.length) {
-      console.log('No images to upload')
-      return
-    }
-
-    try {
-      const uploadPromises = images.map((imageUrl) =>
-        fetch(imageUrl)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const file = new File([blob], 'image.jpg', { type: 'image/jpeg' })
-            return UploadAttachments(file)
-          }),
-      )
-
-      const attachments = await Promise.all(uploadPromises)
-
-      const result = createCheckInApi({
-        customerId: data.customerId,
-        details: data.description,
-        attachmentsIds: attachments.map(
-          (attachment) => attachment.attachmentId,
-        ),
-      })
-
-      console.log('Check-in created:', result)
-
-      console.log('Upload successful:', attachments)
-    } catch (error) {
-      console.error('Error uploading images:', error)
-    }
   }
 
   const { isDragActive, getInputProps, fileRejections } = useDropzone({
@@ -86,7 +52,7 @@ export function CreateCheckIn() {
     maxSize: 5 * 1024 * 1024,
     onDrop: (acceptedFiles) => {
       acceptedFiles.forEach((file) => {
-        ResizeImage(file, 1024, 1024, 0.1).then((ResizedImage) => {
+        ResizeImage(file, 1024, 1024, 0.5).then((ResizedImage) => {
           ResizedImage.arrayBuffer()
           const reader = new FileReader()
           reader.onloadend = () => {
@@ -112,6 +78,30 @@ export function CreateCheckIn() {
     setValue('customerId', customerData?.customerId || '')
   }, [customerData, setValue])
 
+  async function handleCreateCheckIn(data: CreateCheckFormData) {
+    if (!images.length) {
+      console.log('No images to upload')
+      return
+    }
+
+    const attachments = []
+    for (const imageUrl of images) {
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+      const file = new File([blob], 'image.jpg', { type: 'image/jpeg' })
+      const attachment = await UploadAttachments(file)
+      attachments.push(attachment)
+    }
+
+    const result = createCheckInApi({
+      customerId: data.customerId,
+      details: data.description,
+      attachmentsIds: attachments.map((attachment) => attachment.attachmentId),
+    })
+
+    console.log('Check-in created:', result)
+  }
+
   return (
     <div className="mt-20 flex h-full w-full items-center justify-center">
       <Helmet title="Criar Check-in" />
@@ -135,7 +125,7 @@ export function CreateCheckIn() {
               </Button>
             </div>
           ) : (
-            <CheckInTableFilters onData={handleData} />
+            <CheckInTableFilters onData={handleSetCustomerData} />
           )}
 
           <form
@@ -147,7 +137,6 @@ export function CreateCheckIn() {
               className="hidden"
               {...register('customerId')}
             />
-            <input type="text" className="hidden" />
             <label
               htmlFor="files"
               className="flex h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-zinc-50 p-4 text-sm text-zinc-600 hover:bg-zinc-100 data-[drag-active=true]:border-primary data-[drag-active=true]:bg-primary dark:bg-zinc-900 dark:text-zinc-400"

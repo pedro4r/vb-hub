@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-import { CustomerPreviewDataInterface } from './create-check-in'
+import { CustomerPreviewDataInterface } from '.'
 
 interface CheckInTableFiltersProps {
   onData: (data: CustomerPreviewDataInterface) => void
