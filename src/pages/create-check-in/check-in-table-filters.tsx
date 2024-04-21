@@ -5,6 +5,10 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import {
+  fetchCustomersByName,
+  FetchCustomersByNameParams,
+} from '@/api/fetch-customers-by-name'
+import {
   getCustomerByHubId,
   GetCustomerByHubIdParams,
 } from '@/api/get-customer-by-hub-id'
@@ -61,6 +65,16 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
       setOpenDialog(true)
 
       setCustomersFound([customer])
+    } else if (data && data.name) {
+      const params: FetchCustomersByNameParams = {
+        name: data.name,
+        page: 1,
+      }
+
+      const customer = await fetchCustomersByName(params)
+      setOpenDialog(true)
+
+      setCustomersFound(customer)
     }
   }
 

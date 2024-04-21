@@ -131,7 +131,7 @@ export function CreateCheckIn() {
     } finally {
       setIsLoading(false) // Finalizar o carregamento
       setImages([]) // Limpar os dados do cliente
-      reset({ description: '', weight: 0 })
+      reset({ description: undefined, weight: undefined })
       toast.success('Check-In criado com sucesso!')
     }
   }
