@@ -1,7 +1,7 @@
 import { api } from '@/lib/axios'
 
 export interface GetCustomerByHubIdParams {
-  hubId: string
+  hubId: number
 }
 
 export async function getCustomerByHubId(params: GetCustomerByHubIdParams) {

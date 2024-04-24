@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Check, Search } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -13,7 +13,7 @@ import {
   GetCustomerByHubIdParams,
 } from '@/api/get-customer-by-hub-id'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/table'
 
 import { CustomerPreviewDataInterface } from '.'
+import { CheckInCustomerSearchPagination } from './check-in-customer-search-pagination'
+import { CheckInCustomersSearchSkeleton } from './check-in-customers-search-skeleton'
 
 interface CheckInTableFiltersProps {
   onData: (data: CustomerPreviewDataInterface) => void
@@ -32,7 +34,10 @@ interface CheckInTableFiltersProps {
 
 const searchCustomerSchema = z
   .object({
-    hubId: z.string().optional(),
+    hubId: z
+      .string()
+      .optional()
+      .transform((value) => Number(value)),
     name: z.string().optional(),
   })
   .refine((data) => data.hubId || data.name, {
@@ -44,6 +49,12 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
   const [customersFound, setCustomersFound] = useState<
     CustomerPreviewDataInterface[]
   >([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [metaData, setMetaData] = useState({
+    pageIndex: 1,
+    perPage: 5,
+    totalCount: 3,
+  })
 
   const [openDialog, setOpenDialog] = useState(false)
 
@@ -56,10 +67,19 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
   }
 
   async function searchCustomer(data: SearchCustomerSchema) {
-    if (data && data.hubId) {
+    setOpenDialog(true)
+    setCurrentPage(1)
+
+    if (data.hubId) {
       const params: GetCustomerByHubIdParams = {
         hubId: data.hubId,
       }
+
+      setMetaData({
+        pageIndex: 1,
+        perPage: 5,
+        totalCount: 1,
+      })
 
       const customer = await getCustomerByHubId(params)
       setOpenDialog(true)
@@ -68,19 +88,47 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
     } else if (data && data.name) {
       const params: FetchCustomersByNameParams = {
         name: data.name,
-        page: 1,
+        page: currentPage,
       }
 
-      const customer = await fetchCustomersByName(params)
-      setOpenDialog(true)
+      const { customers, meta } = await fetchCustomersByName(params)
 
-      setCustomersFound(customer)
+      setMetaData(meta)
+
+      setCustomersFound(customers)
     }
   }
 
-  const { register, handleSubmit } = useForm<SearchCustomerSchema>({
-    resolver: zodResolver(searchCustomerSchema),
-  })
+  const { register, handleSubmit, getValues, watch } =
+    useForm<SearchCustomerSchema>({
+      resolver: zodResolver(searchCustomerSchema),
+    })
+
+  function handlePaginate(pageIndex: number) {
+    setCustomersFound([])
+    setCurrentPage(pageIndex)
+    const data = getValues()
+
+    if (data.name) {
+      const params: FetchCustomersByNameParams = {
+        name: data.name,
+        page: pageIndex,
+      }
+
+      fetchCustomersByName(params).then(({ customers }) => {
+        setCustomersFound(customers)
+      })
+    }
+  }
+
+  const hubId = watch('hubId')
+  const name = watch('name')
+
+  useEffect(() => {
+    if (!openDialog) {
+      setCustomersFound([])
+    }
+  }, [openDialog])
 
   return (
     <>
@@ -89,16 +137,26 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
         onSubmit={handleSubmit(searchCustomer)}
       >
         <Input
+          disabled={!!name}
+          type="string"
           placeholder="Hub ID"
-          className="h-[40px] w-[70px]"
+          className="h-[40px] w-[70px] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          onKeyDown={(event) => {
+            if (!/[0-9]/.test(event.key) && event.key !== 'Backspace') {
+              event.preventDefault()
+            }
+          }}
+          inputMode="numeric"
           {...register('hubId')}
         />
         <Input
+          disabled={!!hubId}
           placeholder="Nome do cliente"
           className="h-[40px]"
           {...register('name')}
         />
         <Button
+          disabled={!(hubId || name)}
           className="h-[40px]"
           variant="secondary"
           size="xs"
@@ -111,7 +169,6 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
-          <DialogHeader></DialogHeader>
           <div className="space-y-6">
             <Table>
               <TableHeader>
@@ -121,31 +178,47 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
                   <TableHead className="text-center"></TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {customersFound.map((data) => (
-                  <TableRow
-                    key={data.customerId}
-                    className="hover:bg-transparent"
-                  >
-                    <TableCell className="text-center">
-                      {`#${data.hubId}`}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {data.firstName} {data.lastName}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        className="h-[30px] w-[50px]"
-                        onClick={() => selectCustomer(data)}
-                      >
-                        <Check />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+              {customersFound.length > 0 ? (
+                <TableBody>
+                  {customersFound.map((data) => (
+                    <TableRow
+                      key={data.customerId}
+                      className="hover:bg-transparent"
+                    >
+                      <TableCell className="w-[5rem] text-center">
+                        {`#${data.hubId}`}
+                      </TableCell>
+                      <TableCell className="w-[15rem] text-center">
+                        {data.firstName} {data.lastName}
+                      </TableCell>
+                      <TableCell className="w-[5rem] text-center">
+                        <Button
+                          className="h-[30px] w-[50px]"
+                          onClick={() => selectCustomer(data)}
+                        >
+                          <Check />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              ) : (
+                <CheckInCustomersSearchSkeleton
+                  perPage={metaData.perPage}
+                  totalCount={metaData.totalCount}
+                  currentPage={currentPage}
+                />
+              )}
             </Table>
           </div>
+          {customersFound.length > 0 ? (
+            <CheckInCustomerSearchPagination
+              onPageChange={handlePaginate}
+              pageIndex={currentPage}
+              totalCount={metaData.totalCount}
+              perPage={metaData.perPage}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
     </>

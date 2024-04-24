@@ -262,7 +262,13 @@ export function CreateCheckIn() {
                   : ''}
               </div>
 
-              <Button className="w-full" type="submit" disabled={isLoading}>
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={
+                  isLoading || customerData === null || images.length === 0
+                }
+              >
                 Criar Check-In
               </Button>
             </form>
