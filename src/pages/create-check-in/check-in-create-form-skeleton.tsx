@@ -14,7 +14,7 @@ export function CheckInCreateFormSkeleton({
         <Skeleton className="col-span-3 mt-1 h-20 w-full" />
       </div>
       <Skeleton className="h-20 w-full" />
-      <div className="flex flex-wrap content-end items-start gap-2">
+      <div className="object-fit flex flex-wrap content-end items-start justify-center gap-2">
         {Array.from({ length: imageCount }, (_, index) => (
           <Skeleton key={index} className="h-[158px] w-[93px]" />
         ))}

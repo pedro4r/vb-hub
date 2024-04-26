@@ -135,6 +135,7 @@ export function CreateCheckIn() {
       toast.success('Check-In criado com sucesso!')
     }
   }
+
   return (
     <div className="mt-20 flex h-full w-full items-center justify-center ">
       <Helmet title="Criar Check-in" />
@@ -239,7 +240,7 @@ export function CreateCheckIn() {
                 </div>
               </label>
 
-              <div className="flex flex-wrap content-end items-start gap-2">
+              <div className="object-fit flex flex-wrap content-end items-start justify-center gap-2">
                 {images
                   ? images.map((image, index) => (
                       <div key={index} className="relative">

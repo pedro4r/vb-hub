@@ -1,59 +1,89 @@
+import { format } from 'date-fns'
+import { useState } from 'react'
+
 import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog'
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { ImageContainer } from '@/components/ui/image-container'
+import { capitalize } from '@/utils/capitalize-string'
 
-import { CheckInCarrousel } from './check-in-carrousel'
+import { CheckInDetailsAttachmentsPagination } from './check-in-details-attachments-pagination'
+import { CheckInDetailsProps } from './check-in-table-row'
 
-export function CheckInDetails() {
+export function CheckInDetails({
+  checkInId,
+  hubId,
+  customerFirstName,
+  customerLastName,
+  attachments,
+  status,
+  weight,
+  details,
+  createdAt,
+}: CheckInDetailsProps) {
+  const windowWidth = window.innerWidth
+
+  const perPage = windowWidth <= 640 ? 9 : 10
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const [attachmentsOnDisplay, setAttachmentsOnDisplay] = useState<string[]>(
+    attachments.slice(0, perPage),
+  )
+  const date = format(new Date(createdAt), 'dd/MM/yyyy')
+
+  function handlePaginate(pageIndex: number) {
+    setCurrentPage(pageIndex)
+    const start = (pageIndex - 1) * perPage
+    const end = pageIndex * perPage
+    setAttachmentsOnDisplay(attachments.slice(start, end))
+  }
   return (
-    <DialogContent className="flex flex-col">
-      <DialogHeader>
-        <DialogTitle>Check-in: 1827fy2827d6h</DialogTitle>
-        <DialogDescription>Hud ID: #9384</DialogDescription>
+    <DialogContent className="flex h-[85vh] w-[90vw] appearance-none flex-col">
+      <DialogHeader className="flex flex-col items-center justify-center">
+        <DialogDescription className="text-xs">
+          {checkInId.toUpperCase()}
+        </DialogDescription>
+        <span>{`#${hubId} ${customerFirstName} ${customerLastName}`}</span>
       </DialogHeader>
 
-      <div className="object-fit self-center">
-        <CheckInCarrousel />
+      <div className="object-fit flex flex-wrap content-end items-start justify-center gap-2">
+        {attachmentsOnDisplay.map((attachment, i) => (
+          <a
+            key={i}
+            className="appearance-none"
+            href={attachment}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <ImageContainer imageSrc={attachment} alt={`${i}`} />
+          </a>
+        ))}
       </div>
 
-      <div className="space-y-6">
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell className="text-muted-foreground">Status</TableCell>
-              <TableCell className="flex justify-end">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-slate-400" />
-                  <span className="font-medium text-muted-foreground">
-                    Pendente
-                  </span>
-                </div>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="text-muted-foreground">
-                Data de Recebimento
-              </TableCell>
-              <TableCell className="flex justify-end">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">12/12/2021</span>
-                </div>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="text-muted-foreground">Cliente</TableCell>
-              <TableCell className="flex justify-end">Pedro Requião</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="text-muted-foreground">Peso</TableCell>
-              <TableCell className="flex justify-end">23lb</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      <CheckInDetailsAttachmentsPagination
+        pageIndex={currentPage}
+        totalCount={attachments.length}
+        perPage={perPage}
+        onPageChange={handlePaginate}
+      />
+
+      <div className="flex flex-row items-center justify-center gap-6">
+        <div className="flex flex-row items-center justify-center gap-5">
+          <span className="text-muted-foreground">Status:</span>
+          <span>{capitalize(status)}</span>
+        </div>
+        <div className="flex flex-row items-center justify-center gap-5">
+          <span className="text-muted-foreground">Weight:</span>
+          <span className="">
+            {weight ? `${Math.round(weight / 453.59237)} lb` : '--'}
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-col items-center justify-center gap-5">
+        <span className="text-muted-foreground">Detalhes</span>
+        <span className="">{details}</span>
       </div>
     </DialogContent>
   )

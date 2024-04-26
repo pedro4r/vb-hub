@@ -9,7 +9,11 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 
-export function CheckInCarrousel() {
+interface CheckInCarrouselProps {
+  imagesUrl: string[]
+}
+
+export function CheckInCarrousel({ imagesUrl }: CheckInCarrouselProps) {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
@@ -31,27 +35,15 @@ export function CheckInCarrousel() {
       <Carousel setApi={setApi}>
         <CarouselPrevious />
         <CarouselContent className="max-h-96 max-w-96">
-          <CarouselItem className="flex justify-center">
-            <img
-              src="public/7e7444bd-34ec-4900-a334-23cdcc1e1914.JPG"
-              alt="Slide 1"
-              className="h-full w-full object-contain"
-            />
-          </CarouselItem>
-          <CarouselItem className="w-px-100 h-px-100 flex justify-center">
-            <img
-              src="public/310a5071-7889-4746-85ff-98f011ff831f.JPG"
-              alt="Slide 2"
-              className="h-full w-full object-contain"
-            />
-          </CarouselItem>
-          <CarouselItem className="w-px-100 h-px-100 flex justify-center">
-            <img
-              src="public/0cd72168-8922-47a7-bd07-54691723009e.JPG"
-              alt="Slide 3"
-              className="h-full w-full object-contain"
-            />
-          </CarouselItem>
+          {imagesUrl.map((imageUrl, index) => (
+            <CarouselItem key={index} className="flex justify-center">
+              <img
+                src={imageUrl}
+                alt={`Slide ${index + 1}`}
+                className="h-full w-full object-contain"
+              />
+            </CarouselItem>
+          ))}
         </CarouselContent>
         <CarouselNext />
       </Carousel>

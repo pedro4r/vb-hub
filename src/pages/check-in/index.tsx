@@ -1,6 +1,8 @@
 import { AlertTriangle, CheckCheck, CheckCircle, Plane } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 
+import { fetchRecentCheckIns } from '@/api/fetch-recent-check-ins'
 import { Pagination } from '@/components/pagination'
 import {
   Table,
@@ -14,7 +16,29 @@ import { CheckInTableFilters } from './check-in-table-filters'
 import { CheckInTableRow } from './check-in-table-row'
 import { CheckInsMetricsCard } from './check-ins-metrics-card'
 
+export interface CheckInPreviewDataInterface {
+  checkInId: string
+  hubId: string
+  customerFirstName: string
+  customerLastName: string
+  status: string
+  packageId?: string
+  weight: number
+  createdAt: string
+}
+
 export function CheckInsList() {
+  const [checkIns, setCheckIns] = useState<CheckInPreviewDataInterface[]>([])
+
+  async function handleFetchRecentCheckIns() {
+    const checkInsPreview = await fetchRecentCheckIns({ page: 1 })
+    setCheckIns(checkInsPreview)
+  }
+
+  useEffect(() => {
+    handleFetchRecentCheckIns()
+  }, [])
+
   return (
     <>
       <Helmet title="Pedidos" />
@@ -45,9 +69,19 @@ export function CheckInsList() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.from({ length: 10 }).map((_, i) => {
-                      return <CheckInTableRow key={i} />
-                    })}
+                    {checkIns.map((checkIn, i) => (
+                      <CheckInTableRow
+                        key={i}
+                        checkInId={checkIn.checkInId}
+                        hubId={checkIn.hubId}
+                        customerFirstName={checkIn.customerFirstName}
+                        customerLastName={checkIn.customerLastName}
+                        status={checkIn.status}
+                        packageId={checkIn.packageId}
+                        weight={checkIn.weight}
+                        createdAt={checkIn.createdAt}
+                      />
+                    ))}
                   </TableBody>
                 </Table>
               </div>

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 import { AppLayout } from './pages/_layout/parcel-forwarding'
-import { CheckInsList } from './pages/check-in/check-ins'
+import { CheckInsList } from './pages/check-in/index'
 import { CreateCheckIn } from './pages/create-check-in'
 import { Dashboard } from './pages/dashboard/dashboard'
 
