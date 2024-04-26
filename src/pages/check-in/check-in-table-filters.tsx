@@ -12,12 +12,11 @@ import {
 
 export function CheckInTableFilters() {
   return (
-    <form className="flex items-center gap-2">
-      <span className="text-sm font-semibold">Filtros:</span>
-      <Input placeholder="Hub ID" className="h-8 w-auto" />
-      <Input placeholder="Nome do cliente" className="h-8 w-[320px]" />
+    <form className="flex flex-wrap items-center gap-2">
+      <Input placeholder="Hub ID" className="h-8 max-w-[4.5rem]" />
+      <Input placeholder="Nome do cliente" className="h-8 max-w-36" />
       <Select defaultValue="all">
-        <SelectTrigger className="h-8 w-[180px]">
+        <SelectTrigger className="h-8 max-w-32">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -29,7 +28,7 @@ export function CheckInTableFilters() {
         </SelectContent>
       </Select>
       <Button variant="secondary" size="xs" type="submit">
-        <Search className="mr-2 h-4 w-4" />
+        <Search className="mr-2 h-4 max-w-48" />
         Filtrar resultados
       </Button>
       <Button variant="outline" size="xs" type="button">

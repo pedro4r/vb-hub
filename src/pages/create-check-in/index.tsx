@@ -20,7 +20,7 @@ import { ResizeImage } from './resize-image'
 
 const createCheckInSchema = z.object({
   customerId: z.string().uuid(),
-  description: z.string().optional(),
+  description: z.string().max(100).optional(),
   weight: z
     .string()
     .optional()

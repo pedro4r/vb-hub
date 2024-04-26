@@ -29,6 +29,7 @@ export interface CheckInPreviewDataInterface {
 
 export function CheckInsList() {
   const [checkIns, setCheckIns] = useState<CheckInPreviewDataInterface[]>([])
+  const windowWidth = window.innerWidth
 
   async function handleFetchRecentCheckIns() {
     const checkInsPreview = await fetchRecentCheckIns({ page: 1 })
@@ -46,7 +47,7 @@ export function CheckInsList() {
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Check-ins</h1>
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-10">
+          <div className={`col-span-${windowWidth < 1024 ? '12' : '10'}`}>
             <div className="space-y-2.5">
               <CheckInTableFilters />
 
@@ -89,32 +90,35 @@ export function CheckInsList() {
               <Pagination pageIndex={0} totalCount={105} perPage={10} />
             </div>
           </div>
-          <div className="col-span-2 mt-10 flex flex-col gap-3">
-            <CheckInsMetricsCard
-              title="Recebidos"
-              value={1928}
-              description="Consultar todos os pedidos recebidos"
-              icon={CheckCircle}
-            />
-            <CheckInsMetricsCard
-              title="Pendententes"
-              value={1928}
-              description="Consultar todos os pedidos recebidos"
-              icon={AlertTriangle}
-            />
-            <CheckInsMetricsCard
-              title="Enviados"
-              value={1928}
-              description="Consultar todos os pedidos recebidos"
-              icon={Plane}
-            />
-            <CheckInsMetricsCard
-              title="Retirados"
-              value={1928}
-              description="Consultar todos os pedidos recebidos"
-              icon={CheckCheck}
-            />
-          </div>
+
+          {windowWidth > 1024 && (
+            <div className="col-span-2 mt-10 flex flex-col gap-3">
+              <CheckInsMetricsCard
+                title="Recebidos"
+                value={1928}
+                description="Consultar todos os pedidos recebidos"
+                icon={CheckCircle}
+              />
+              <CheckInsMetricsCard
+                title="Pendententes"
+                value={1928}
+                description="Consultar todos os pedidos recebidos"
+                icon={AlertTriangle}
+              />
+              <CheckInsMetricsCard
+                title="Enviados"
+                value={1928}
+                description="Consultar todos os pedidos recebidos"
+                icon={Plane}
+              />
+              <CheckInsMetricsCard
+                title="Retirados"
+                value={1928}
+                description="Consultar todos os pedidos recebidos"
+                icon={CheckCheck}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
