@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "serve": "serve -s dist -l 5173",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -40,6 +41,7 @@
     "react-hook-form": "^7.43.9",
     "react-router-dom": "^6.21.0",
     "recharts": "2.12.1",
+    "serve": "14.2.3",
     "sonner": "^1.2.4",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.1.0",

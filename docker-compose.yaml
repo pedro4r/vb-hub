@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  vb-hub:
+    container_name: vb-hub
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+      - VITE_ENABLE_API_DELAY=${VITE_ENABLE_API_DELAY}
+    build:
+      context: .
+    ports:
+      - 5173:5173
+    networks:
+      - vb-nest-api_hub-network
+
+networks:
+  vb-nest-api_hub-network:
+    external: true

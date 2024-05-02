@@ -30,6 +30,7 @@ export interface CheckInPreviewDataInterface {
 export function CheckInsList() {
   const [checkIns, setCheckIns] = useState<CheckInPreviewDataInterface[]>([])
   const windowWidth = window.innerWidth
+  const colSpanClass = windowWidth > 1024 ? 'col-span-10' : 'col-span-12'
 
   async function handleFetchRecentCheckIns() {
     const checkInsPreview = await fetchRecentCheckIns({ page: 1 })
@@ -47,7 +48,7 @@ export function CheckInsList() {
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Check-ins</h1>
         <div className="grid grid-cols-12 gap-4">
-          <div className={`col-span-${windowWidth < 1024 ? '12' : '10'}`}>
+          <div className={colSpanClass}>
             <div className="space-y-2.5">
               <CheckInTableFilters />
 
