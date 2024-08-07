@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      
+
 permissions:
   id-token: write
   contents: write
@@ -34,5 +34,5 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::629500205300:role/vb-hub-react-build-gh-actions-s3
+          role-to-assume: arn:aws:iam::629500205300:role/vb-hub-dashboard-react-build-s3
           aws-region: us-east-1
