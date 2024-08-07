@@ -24,3 +24,9 @@ jobs:
 
       - name: Build project
         run: npm run build
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::629500205300:role/vb-hub-react-build-gh-actions-s3
+          aws-region: us-east-1
