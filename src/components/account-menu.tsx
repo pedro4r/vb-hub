@@ -1,4 +1,7 @@
 import { Building, ChevronDown, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+
+import { companyLogout } from '@/api/logout'
 
 import { Button } from './ui/button'
 import {
@@ -11,6 +14,15 @@ import {
 } from './ui/dropdown-menu'
 
 export function AccountMenu() {
+  const navigate = useNavigate()
+  const handleLogout = async () => {
+    try {
+      await companyLogout()
+      navigate('/login/company')
+    } catch (error) {
+      console.error('Erro ao fazer sign out:', error)
+    }
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,7 +47,10 @@ export function AccountMenu() {
           <Building className="mr-2 h-4 w-4" />
           <span>Perfil da loja</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-rose-500 dark:text-rose-400">
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-rose-500 dark:text-rose-400"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

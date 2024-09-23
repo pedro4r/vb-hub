@@ -5,6 +5,8 @@ import { CheckInsList } from './pages/check-in/index'
 import { CompanyLogin } from './pages/company-login'
 import { CreateCheckIn } from './pages/create-check-in'
 import { Dashboard } from './pages/dashboard/dashboard'
+import { ResetPassword } from './pages/reset-password'
+import { SendResetPasswordEmail } from './pages/send-reset-password-email'
 import ProtectedRoute from './protected-route'
 
 export const router = createBrowserRouter([
@@ -32,6 +34,19 @@ export const router = createBrowserRouter([
       {
         path: 'check-in/create',
         element: <ProtectedRoute element={<CreateCheckIn />} />,
+      },
+    ],
+  },
+  {
+    path: '/',
+    children: [
+      {
+        path: 'send-reset-password-email',
+        element: <SendResetPasswordEmail />,
+      },
+      {
+        path: 'reset-password',
+        element: <ResetPassword />,
       },
     ],
   },

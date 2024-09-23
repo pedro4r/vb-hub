@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { AuthParams, companyAuthenticate } from '@/api/company-login'
@@ -13,6 +14,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 export function CompanyLogin() {
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -26,6 +28,7 @@ export function CompanyLogin() {
       await companyAuthenticate(params)
       navigate('/')
     } catch (error) {
+      setErrorMsg('Email ou senha inválidos')
       console.error('Erro', error)
     }
   }
@@ -82,13 +85,25 @@ export function CompanyLogin() {
               </p>
             )}
           </div>
-          <div className="flex items-center justify-between">
+
+          <div className="flex flex-col items-center justify-between space-y-4">
+            {errorMsg && (
+              <div className="flex flex-col items-center">
+                <p className="mb-4 text-red-500">{errorMsg}</p>
+              </div>
+            )}
             <button
-              className="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+              className="focus:shadow-outline w-full rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
               type="submit"
             >
               Acessar
             </button>
+            <Link
+              className="focus:shadow-outline text-white-500 flex w-full justify-center rounded bg-transparent px-4 py-2 hover:text-gray-300 focus:outline-none"
+              to="/send-reset-password-email"
+            >
+              <span>Esqueci minha senha</span>
+            </Link>
           </div>
         </form>
       </div>
