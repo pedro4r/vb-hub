@@ -5,9 +5,7 @@ export interface GetCustomerByHubIdParams {
 }
 
 export async function getCustomerByHubId(params: GetCustomerByHubIdParams) {
-  const result = await api.get(`/customer/${params.hubId}`, {
-    withCredentials: true,
-  })
+  const result = await api.get(`/customer/${params.hubId}`)
 
   return result.data.customerPreview
 }

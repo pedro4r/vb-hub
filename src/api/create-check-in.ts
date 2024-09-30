@@ -8,8 +8,6 @@ export interface CreateCheckInParams {
 }
 
 export async function createCheckInApi(params: CreateCheckInParams) {
-  const result = await api.post(`/check-in`, params, {
-    withCredentials: true,
-  })
+  const result = await api.post(`/check-in`, params)
   return result.status
 }

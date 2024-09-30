@@ -5,9 +5,7 @@ export interface GetCheckInParams {
 }
 
 export async function getCheckIn(params: GetCheckInParams) {
-  const result = await api.get(`/check-in/${params.checkInId}`, {
-    withCredentials: true,
-  })
+  const result = await api.get(`/check-in/${params.checkInId}`)
 
   return result.data.checkInDetails
 }

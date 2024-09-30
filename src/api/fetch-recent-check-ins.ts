@@ -5,8 +5,6 @@ export interface FetchRecentCheckInsParams {
 }
 
 export async function fetchRecentCheckIns(params: FetchRecentCheckInsParams) {
-  const result = await api.get(`/check-ins?page=${params.page}`, {
-    withCredentials: true,
-  })
+  const result = await api.get(`/check-ins?page=${params.page}`)
   return result.data.checkInsPreview
 }
