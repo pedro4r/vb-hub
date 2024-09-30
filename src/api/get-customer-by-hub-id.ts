@@ -5,11 +5,8 @@ export interface GetCustomerByHubIdParams {
 }
 
 export async function getCustomerByHubId(params: GetCustomerByHubIdParams) {
-  const accessToken = localStorage.getItem('access_token')
   const result = await api.get(`/customer/${params.hubId}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    withCredentials: true,
   })
 
   return result.data.customerPreview

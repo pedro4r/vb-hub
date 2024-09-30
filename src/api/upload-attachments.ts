@@ -10,12 +10,11 @@ export async function UploadAttachments(
   const formData = new FormData()
   formData.append('file', file)
 
-  const accessToken = localStorage.getItem('access_token')
   const response = await api.post('/attachments', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-      Authorization: `Bearer ${accessToken}`,
     },
+    withCredentials: true,
   })
 
   const attachment = response.data

@@ -5,11 +5,8 @@ export interface FetchRecentCheckInsParams {
 }
 
 export async function fetchRecentCheckIns(params: FetchRecentCheckInsParams) {
-  const accessToken = localStorage.getItem('access_token')
   const result = await api.get(`/check-ins?page=${params.page}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    withCredentials: true,
   })
   return result.data.checkInsPreview
 }

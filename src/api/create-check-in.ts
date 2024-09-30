@@ -8,11 +8,8 @@ export interface CreateCheckInParams {
 }
 
 export async function createCheckInApi(params: CreateCheckInParams) {
-  const accessToken = localStorage.getItem('access_token')
   const result = await api.post(`/check-in`, params, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    withCredentials: true,
   })
   return result.status
 }

@@ -7,7 +7,9 @@ export interface AuthParams {
 
 export async function companyAuthenticate(params: AuthParams) {
   try {
-    await api.post('/sessions/login', params)
+    await api.post('/sessions/login', params, {
+      withCredentials: true, // Necessário para enviar e receber cookies
+    })
   } catch (error) {
     console.error('Error during authentication:', error)
     throw error

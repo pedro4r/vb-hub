@@ -5,11 +5,8 @@ export interface GetCheckInParams {
 }
 
 export async function getCheckIn(params: GetCheckInParams) {
-  const accessToken = localStorage.getItem('access_token')
   const result = await api.get(`/check-in/${params.checkInId}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    withCredentials: true,
   })
 
   return result.data.checkInDetails
