@@ -12,7 +12,7 @@ import { TopTenCustomersListCard } from './top-ten-customers-list-card'
 export function Dashboard() {
   return (
     <>
-      <Helmet title="Dashboard" />
+      <Helmet title="Dashboard Test" />
       <div className="flex flex-col gap-4">
         <div className="flex flex-row justify-between first-letter:gap-4">
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
