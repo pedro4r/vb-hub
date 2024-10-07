@@ -9,6 +9,8 @@ export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
   const envVars = loadEnv(mode, process.cwd())
 
+  const isDevelopment = mode === 'development'
+
   return {
     plugins: [react()],
     resolve: {
@@ -16,19 +18,21 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    server: {
-      https: {
-        key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
-        cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem')),
-      },
-      proxy: {
-        '/api': {
-          target: envVars.VITE_API_URL,
-          changeOrigin: true,
-          secure: true, // Certifica-se de que o proxy também está usando HTTPS.
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-      },
-    },
+    server: isDevelopment
+      ? {
+          https: {
+            key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
+            cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem')),
+          },
+          proxy: {
+            '/api': {
+              target: envVars.VITE_API_URL,
+              changeOrigin: true,
+              secure: true, // Certifica-se de que o proxy também está usando HTTPS.
+              rewrite: (path) => path.replace(/^\/api/, ''),
+            },
+          },
+        }
+      : undefined,
   }
 })
