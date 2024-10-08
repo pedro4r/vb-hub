@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   useEffect(() => {
     console.log('oi')
@@ -23,11 +23,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
 
     checkAuthentication()
   }, [isAuthenticated])
-
-  if (isAuthenticated === null) {
-    // Carregando estado
-    return <div>Loading...</div>
-  }
 
   if (!isAuthenticated) {
     // Redireciona para a página de login se não estiver autenticado
