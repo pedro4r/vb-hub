@@ -10,9 +10,8 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
-  console.log('oi')
-
   useEffect(() => {
+    console.log('oi')
     const checkAuthentication = async () => {
       try {
         await verifyToken()
