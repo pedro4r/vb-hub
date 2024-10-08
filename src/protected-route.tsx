@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
     }
 
     checkAuthentication()
-  }, [isAuthenticated])
+  }, []) // Remover isAuthenticated das dependências
 
   if (isAuthenticated === null) {
     // Carregando estado
