@@ -25,6 +25,12 @@ jobs:
           node-version: 18
           cache: 'npm'
 
+      - name: Load .env variables
+        run: |
+          if [ -f .env ]; then
+            export $(cat .env | xargs)
+          fi
+
       - name: Install dependencies
         run: npm install --verbose
 
@@ -39,4 +45,4 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync dist/ s3://vb-hub-dashboard-build --delete
+          # Adicione aqui os comandos para fazer o deploy para o S3
