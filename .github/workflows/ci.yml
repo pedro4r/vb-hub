@@ -25,17 +25,19 @@ jobs:
           node-version: 18
           cache: 'npm'
 
-      - name: Load .env variables
-        run: |
-          if [ -f .env ]; then
-            export $(cat .env | xargs)
-          fi
-
       - name: Install dependencies
         run: npm install --verbose
+        env:
+          VITE_STAGE: ${{ secrets.VITE_STAGE }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_ENABLE_API_DELAY: ${{ secrets.VITE_ENABLE_API_DELAY }}
 
       - name: Build project
         run: npm run build
+        env:
+          VITE_STAGE: ${{ secrets.VITE_STAGE }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_ENABLE_API_DELAY: ${{ secrets.VITE_ENABLE_API_DELAY }}
       
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,4 +47,4 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          # Adicione aqui os comandos para fazer o deploy para o S3
+          aws s3 sync dist/ s3://vb-hub-dashboard-build --delete
