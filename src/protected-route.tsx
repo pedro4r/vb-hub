@@ -21,15 +21,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
     }
 
     checkAuthentication()
-  }, []) // Remover isAuthenticated das dependências
+  }, [])
 
   if (isAuthenticated === null) {
-    // Carregando estado
     return <div>Loading...</div>
   }
 
   if (!isAuthenticated) {
-    // Redireciona para a página de login se não estiver autenticado
     return <Navigate to="/login/company" replace />
   }
 

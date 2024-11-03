@@ -47,4 +47,4 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync dist/ s3://vb-hub-dashboard-build --delete
+          aws s3 sync dist/ s3://www.hubdash.space --delete
