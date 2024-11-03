@@ -45,6 +45,6 @@ jobs:
           role-to-assume: arn:aws:iam::629500205300:role/vb-hub-dashboard-react-build-s3
           aws-region: us-east-1
 
-      - name: Deploy to S3
+      - name: Deploy to S3 Bucket
         run: |
           aws s3 sync dist/ s3://www.hubdash.space --delete
