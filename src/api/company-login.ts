@@ -5,9 +5,10 @@ export interface AuthParams {
   password: string
 }
 
-export async function companyAuthenticate(params: AuthParams) {
+export async function companyAuthenticate() {
   try {
-    await api.post('/sessions/login', params)
+    const oi = await api.get('/test')
+    console.log(oi)
   } catch (error) {
     console.error('Error during authentication:', error)
     throw error
