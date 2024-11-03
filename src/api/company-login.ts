@@ -5,7 +5,8 @@ export interface AuthParams {
   password: string
 }
 
-export async function companyAuthenticate() {
+export async function companyAuthenticate(params: AuthParams) {
+  console.log(params)
   try {
     const oi = await api.get('/test')
     console.log(oi)
