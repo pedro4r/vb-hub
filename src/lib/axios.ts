@@ -2,8 +2,11 @@ import axios from 'axios'
 
 import { env } from '@/env'
 
+// Define a baseURL dependendo do ambiente configurado pela variável VITE_STAGE
+const baseURL = env.VITE_STAGE === 'development' ? '/api' : env.VITE_API_URL
+
 export const api = axios.create({
-  baseURL: env.VITE_API_URL,
+  baseURL,
   withCredentials: true,
 })
 
