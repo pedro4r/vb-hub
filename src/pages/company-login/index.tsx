@@ -5,7 +5,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { AuthParams, companyAuthenticate } from '@/api/company-login'
-import { testApi } from '@/api/test-api'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -15,14 +14,6 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 export function CompanyLogin() {
-  const handleTestClick = async () => {
-    try {
-      await testApi()
-      console.log('API call successful')
-    } catch (error) {
-      console.error('Error during API call:', error)
-    }
-  }
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const {
     register,
@@ -115,13 +106,6 @@ export function CompanyLogin() {
             </Link>
           </div>
         </form>
-        <button
-          className="focus:shadow-outline w-full rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
-          type="button"
-          onClick={handleTestClick}
-        >
-          Test
-        </button>
       </div>
     </>
   )

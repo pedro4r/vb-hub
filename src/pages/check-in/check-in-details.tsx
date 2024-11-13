@@ -63,11 +63,8 @@ export function CheckInDetails({
       </div>
       {details.length > 0 ? (
         <div className="flex w-full flex-row gap-5 rounded-sm bg-zinc-900 p-2">
-          <span className="text-muted-foreground">Obs</span>
-          <span className="w-full self-center">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam
-            debitis dolorem perfer
-          </span>
+          <span className="text-muted-foreground">Obs.</span>
+          <span className="w-full self-center">{details}</span>
         </div>
       ) : (
         ''

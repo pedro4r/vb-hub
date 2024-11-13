@@ -46,14 +46,16 @@ const searchCustomerSchema = z
 type SearchCustomerSchema = z.infer<typeof searchCustomerSchema>
 
 export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
+  const [loading, setLoading] = useState(false)
   const [customersFound, setCustomersFound] = useState<
     CustomerPreviewDataInterface[]
   >([])
+  const [errorMessage, setErrorMessage] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [metaData, setMetaData] = useState({
     pageIndex: 1,
     perPage: 5,
-    totalCount: 3,
+    totalCount: 1,
   })
 
   const [openDialog, setOpenDialog] = useState(false)
@@ -81,21 +83,35 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
         totalCount: 1,
       })
 
-      const customer = await getCustomerByHubId(params)
-      setOpenDialog(true)
-
-      setCustomersFound([customer])
+      try {
+        setLoading(true)
+        const customer = await getCustomerByHubId(params)
+        setOpenDialog(true)
+        setCustomersFound([customer])
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching customer:', error)
+        setErrorMessage('Cliente não encontrado')
+        setLoading(false)
+      }
     } else if (data && data.name) {
       const params: FetchCustomersByNameParams = {
         name: data.name,
         page: currentPage,
       }
 
-      const { customers, meta } = await fetchCustomersByName(params)
-
-      setMetaData(meta)
-
-      setCustomersFound(customers)
+      try {
+        setLoading(true)
+        const { customers, meta } = await fetchCustomersByName(params)
+        setMetaData(meta)
+        setOpenDialog(true)
+        setCustomersFound(customers)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching customer:', error)
+        setErrorMessage('Cliente não encontrado')
+        setLoading(false)
+      }
     }
   }
 
@@ -104,7 +120,8 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
       resolver: zodResolver(searchCustomerSchema),
     })
 
-  function handlePaginate(pageIndex: number) {
+  async function handlePaginate(pageIndex: number) {
+    setLoading(true)
     setCustomersFound([])
     setCurrentPage(pageIndex)
     const data = getValues()
@@ -115,10 +132,15 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
         page: pageIndex,
       }
 
-      fetchCustomersByName(params).then(({ customers }) => {
+      try {
+        const { customers } = await fetchCustomersByName(params)
         setCustomersFound(customers)
-      })
+      } catch (error) {
+        console.error('Error fetching customers:', error)
+        setErrorMessage('Erro ao buscar clientes')
+      }
     }
+    setLoading(false)
   }
 
   const hubId = watch('hubId')
@@ -178,7 +200,13 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
                   <TableHead className="text-center"></TableHead>
                 </TableRow>
               </TableHeader>
-              {customersFound.length > 0 ? (
+              {loading ? (
+                <CheckInCustomersSearchSkeleton
+                  perPage={metaData.perPage}
+                  totalCount={metaData.totalCount}
+                  currentPage={currentPage}
+                />
+              ) : customersFound.length > 0 ? (
                 <TableBody>
                   {customersFound.map((data) => (
                     <TableRow
@@ -203,11 +231,13 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
                   ))}
                 </TableBody>
               ) : (
-                <CheckInCustomersSearchSkeleton
-                  perPage={metaData.perPage}
-                  totalCount={metaData.totalCount}
-                  currentPage={currentPage}
-                />
+                <TableBody>
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      <p className=" text-red-500">{errorMessage}</p>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
               )}
             </Table>
           </div>

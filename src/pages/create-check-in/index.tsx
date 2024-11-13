@@ -123,10 +123,8 @@ export function CreateCheckIn() {
         ),
       })
 
-      // A Promise foi resolvida
       console.log(result)
     } catch (error) {
-      // A Promise foi rejeitada
       console.error(error)
     } finally {
       setIsLoading(false) // Finalizar o carregamento
