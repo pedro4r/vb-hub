@@ -2,7 +2,7 @@ import { AlertTriangle, CheckCheck, CheckCircle, Plane } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 
-import { fetchRecentCheckIns } from '@/api/fetch-recent-check-ins'
+import { filterCheckInsApi } from '@/api/filter-check-ins'
 import { Pagination } from '@/components/pagination'
 import {
   Table,
@@ -27,19 +27,25 @@ export interface CheckInPreviewDataInterface {
   createdAt: string
 }
 
+export interface CheckInsFilterDataInterface {
+  status?: number
+  hubId?: number
+  customerName?: string
+}
+
 export function CheckInsList() {
   const [checkIns, setCheckIns] = useState<CheckInPreviewDataInterface[]>([])
   const windowWidth = window.innerWidth
   const colSpanClass = windowWidth > 1024 ? 'col-span-10' : 'col-span-12'
 
-  async function handleFetchRecentCheckIns() {
-    const checkInsPreview = await fetchRecentCheckIns({ page: 1 })
-    setCheckIns(checkInsPreview)
-  }
-
   useEffect(() => {
-    handleFetchRecentCheckIns()
+    handleFilterCheckIns({})
   }, [])
+
+  async function handleFilterCheckIns(data: CheckInsFilterDataInterface) {
+    const response = await filterCheckInsApi(data)
+    setCheckIns(response.checkInsPreview)
+  }
 
   return (
     <>
@@ -50,7 +56,7 @@ export function CheckInsList() {
         <div className="grid grid-cols-12 gap-4">
           <div className={colSpanClass}>
             <div className="space-y-2.5">
-              <CheckInTableFilters />
+              <CheckInTableFilters onData={handleFilterCheckIns} />
 
               <div className="rounded-md border">
                 <Table>

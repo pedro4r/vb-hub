@@ -61,6 +61,7 @@ export function CheckInTableFilters({ onData }: CheckInTableFiltersProps) {
   const [openDialog, setOpenDialog] = useState(false)
 
   function selectCustomer(data: CustomerPreviewDataInterface) {
+    // Check if the data has the required fields
     if (data && data.firstName && data.lastName && data.hubId) {
       onData(data as CustomerPreviewDataInterface)
     }
