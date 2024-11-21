@@ -14,6 +14,7 @@ import {
 
 import { CheckInTableFilters } from './check-in-table-filters'
 import { CheckInTableRow } from './check-in-table-row'
+import { CheckInsLoadingSkeleton } from './check-ins-loading-skeleton'
 import { CheckInsMetricsCard } from './check-ins-metrics-card'
 
 export interface CheckInPreviewDataInterface {
@@ -31,20 +32,46 @@ export interface CheckInsFilterDataInterface {
   status?: number
   hubId?: number
   customerName?: string
+  page?: number
 }
 
 export function CheckInsList() {
+  const [checkInsFilterData, setCheckInsFilterData] =
+    useState<CheckInsFilterDataInterface>({
+      ...{ page: 1 },
+    })
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [metaData, setMetaData] = useState({
+    pageIndex: 0,
+    perPage: 8,
+    totalCount: 0,
+  })
   const [checkIns, setCheckIns] = useState<CheckInPreviewDataInterface[]>([])
   const windowWidth = window.innerWidth
   const colSpanClass = windowWidth > 1024 ? 'col-span-10' : 'col-span-12'
 
   useEffect(() => {
-    handleFilterCheckIns({})
-  }, [])
+    handleFilterCheckIns(checkInsFilterData)
+  }, [checkInsFilterData])
 
   async function handleFilterCheckIns(data: CheckInsFilterDataInterface) {
-    const response = await filterCheckInsApi(data)
-    setCheckIns(response.checkInsPreview)
+    setCheckInsFilterData(data)
+    const checkInsPreview = await filterCheckInsApi(data)
+    setCheckIns(checkInsPreview.checkIns)
+    setMetaData({
+      pageIndex: checkInsPreview.meta.pageIndex,
+      perPage: checkInsPreview.meta.perPage,
+      totalCount: checkInsPreview.meta.totalCount,
+    })
+    setIsLoading(false)
+  }
+
+  async function handlePaginate(pageIndex: number) {
+    setIsLoading(true)
+    setCheckIns([])
+    setCurrentPage(pageIndex)
+    setCheckInsFilterData({ ...checkInsFilterData, page: pageIndex })
   }
 
   return (
@@ -62,39 +89,70 @@ export function CheckInsList() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[64px]"></TableHead>
-                      <TableHead className=" text-center">Código</TableHead>
-                      <TableHead className="text-center">
+                      <TableHead className="w-[5rem] text-center"></TableHead>
+                      <TableHead className="w-[6rem] text-center">
+                        Código
+                      </TableHead>
+                      <TableHead className="w-[15rem] text-center">
                         Data de Recebimento
                       </TableHead>
-                      <TableHead className="text-center">Peso</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
-                      <TableHead className="text-center">Hub ID</TableHead>
-                      <TableHead className="text-center">Cliente</TableHead>
-                      <TableHead className="w-[164px] text-center">
+                      <TableHead className="w-[5rem] text-center">
+                        Peso
+                      </TableHead>
+                      <TableHead className="w-[10rem] text-center">
+                        Status
+                      </TableHead>
+                      <TableHead className="w-[5rem] text-center">
+                        Hub ID
+                      </TableHead>
+                      <TableHead className="w-[15rem] text-center">
+                        Cliente
+                      </TableHead>
+                      <TableHead className="w-[10rem] text-center">
                         Box ID
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {checkIns.map((checkIn, i) => (
-                      <CheckInTableRow
-                        key={i}
-                        checkInId={checkIn.checkInId}
-                        hubId={checkIn.hubId}
-                        customerFirstName={checkIn.customerFirstName}
-                        customerLastName={checkIn.customerLastName}
-                        status={checkIn.status}
-                        packageId={checkIn.packageId}
-                        weight={checkIn.weight}
-                        createdAt={checkIn.createdAt}
+                    {isLoading ? (
+                      <CheckInsLoadingSkeleton
+                        perPage={metaData.perPage}
+                        totalCount={metaData.totalCount}
+                        currentPage={currentPage}
                       />
-                    ))}
+                    ) : checkIns.length === 0 ? (
+                      <TableRow className="">
+                        <td colSpan={8} className="p-8 text-center">
+                          Nenhum check-in encontrado
+                        </td>
+                      </TableRow>
+                    ) : (
+                      checkIns.map((checkIn, i) => (
+                        <CheckInTableRow
+                          key={i}
+                          checkInId={checkIn.checkInId}
+                          hubId={checkIn.hubId}
+                          customerFirstName={checkIn.customerFirstName}
+                          customerLastName={checkIn.customerLastName}
+                          status={checkIn.status}
+                          packageId={checkIn.packageId}
+                          weight={checkIn.weight}
+                          createdAt={checkIn.createdAt}
+                        />
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
 
-              <Pagination pageIndex={0} totalCount={105} perPage={10} />
+              {isLoading ? null : (
+                <Pagination
+                  pageIndex={metaData.pageIndex}
+                  totalCount={metaData.totalCount}
+                  perPage={metaData.perPage}
+                  onPageChange={handlePaginate}
+                />
+              )}
             </div>
           </div>
 
